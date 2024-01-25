@@ -1,0 +1,56 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+      http:
+        endpoint: "0.0.0.0:4318"
+  otlp/spanmetrics:
+    protocols:
+      grpc:
+        endpoint: "localhost:65535"
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:9090"
+    resource_to_telemetry_conversion:
+      enabled: true
+
+processors:
+  batch:
+
+connectors:
+  spangaugemetrics:
+    resource:
+      attributes:
+        - service.name
+    span:
+      trace_id: true
+      span_id: true
+      parent_span_id: true
+      start_ts: true
+      end_ts: true
+      name: true
+      attributes:
+        - kind
+        - database_id
+    span_events:
+      trace_id: true
+      span_id: true
+      name: true
+      attributes:
+        - exception.message
+        - exception.type
+    namespace: spangaugemetricsconn
+  spangaugemetrics/default:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [spangaugemetrics/default]
+    metrics:
+      receivers: [spangaugemetrics/default]
+      processors: [batch]
+      exporters: [prometheus]
