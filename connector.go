@@ -121,6 +121,8 @@ func (c *connectorImp) ConsumeTraces(ctx context.Context, traces ptrace.Traces) 
 				spm.SetUnit("ms")
 
 				dp := spm.SetEmptyGauge().DataPoints().AppendEmpty()
+				dp.SetStartTimestamp(span.StartTimestamp())
+				dp.SetTimestamp(span.EndTimestamp())
 				dp.SetDoubleValue(float64(span.EndTimestamp().AsTime().Sub(span.StartTimestamp().AsTime()).Nanoseconds()) / float64(time.Millisecond))
 
 				spanAttr := pcommon.NewMap()
@@ -153,6 +155,8 @@ func (c *connectorImp) ConsumeTraces(ctx context.Context, traces ptrace.Traces) 
 					spm.SetName(c.config.Namespace + ".span_event")
 
 					dp := spm.SetEmptyGauge().DataPoints().AppendEmpty()
+					dp.SetStartTimestamp(span.StartTimestamp())
+					dp.SetTimestamp(span.EndTimestamp())
 					dp.SetIntValue(1)
 
 					spanEventAttr := pcommon.NewMap()
