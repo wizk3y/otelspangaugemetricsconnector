@@ -123,7 +123,8 @@ func (c *connectorImp) ConsumeTraces(ctx context.Context, traces ptrace.Traces) 
 				dp := spm.SetEmptyGauge().DataPoints().AppendEmpty()
 				dp.SetDoubleValue(float64(span.EndTimestamp().AsTime().Sub(span.StartTimestamp().AsTime()).Nanoseconds()) / float64(time.Millisecond))
 
-				spanAttr := span.Attributes()
+				spanAttr := pcommon.NewMap()
+				span.Attributes().CopyTo(spanAttr) // original attributes are immutable
 				if c.config.Span.TraceID {
 					spanAttr.PutStr("span_trace_id", span.TraceID().String())
 				}
@@ -154,7 +155,8 @@ func (c *connectorImp) ConsumeTraces(ctx context.Context, traces ptrace.Traces) 
 					dp := spm.SetEmptyGauge().DataPoints().AppendEmpty()
 					dp.SetIntValue(1)
 
-					spanEventAttr := spanEvent.Attributes()
+					spanEventAttr := pcommon.NewMap()
+					spanEvent.Attributes().CopyTo(spanEventAttr) // original attributes are immutable
 					if c.config.SpanEvents.TraceID {
 						spanEventAttr.PutStr("span_trace_id", span.TraceID().String())
 					}
